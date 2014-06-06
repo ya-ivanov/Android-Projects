@@ -1,2 +1,2 @@
-2012 Android Projects
+Android Projects
 ================
