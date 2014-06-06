@@ -1,0 +1,47 @@
+package com.simple_caller;
+
+public class ListContactItemAdapter extends ArrayAdapter<Contact> {
+
+private int mLineLayout;
+private LayoutInflater mInflater;
+
+public ListContactItemAdapter(Context pContext, int pLineLayout) {
+    super(pContext, pLineLayout);
+
+    this.mLineLayout = pLineLayout;
+    this.mInflater = (LayoutInflater) pContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+}
+
+static class ViewHolder {
+
+    TextView contactName;
+    TextView contactNumber;
+}
+
+@Override
+public View getView(int pPosition, View pView, ViewGroup pParent) {
+
+    ViewHolder holder;
+    if (pView == null) {
+
+        pView = this.mInflater.inflate(this.mLineLayout, null);
+
+        holder = new ViewHolder();
+        holder.contactName = (TextView) pView.findViewById(R.id.contactName);
+        holder.contactNumber = (TextView) pView.findViewById(R.id.contactNumber);
+
+        pView.setTag(holder);
+
+    } else {
+        holder = (ViewHolder) pView.getTag();
+    }
+
+    Contact contact = getItem(pPosition);
+    if (contact != null) {
+
+        holder.contactName.setText(contact.name);
+        holder.contactNumber.setText(contact.number);
+    }
+
+    return pView;
+}

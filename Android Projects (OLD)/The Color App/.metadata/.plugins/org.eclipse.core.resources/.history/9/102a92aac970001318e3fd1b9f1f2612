@@ -1,0 +1,134 @@
+package com.the.color.app;
+
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.app.Activity;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.view.Menu;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+public class MainActivity extends Activity {
+
+	ImageView image, pickImage;
+	EditText colorHex;
+	LinearLayout layout;
+	private static int RESULT_LOAD_IMAGE = 1;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setTheme(android.R.style.Theme_Holo_NoActionBar);
+		setContentView(R.layout.activity_main);
+
+		image = (ImageView) findViewById(R.id.image);
+		pickImage = (ImageView) findViewById(R.id.pickImage);
+		colorHex = (EditText) findViewById(R.id.colorHex);
+		layout = (LinearLayout) findViewById(R.id.layout);
+		image.setImageResource(R.drawable.theme);
+
+		
+		colorHex.setOnLongClickListener(new OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View arg0) {
+				
+				return false;
+			}
+			
+		});
+		
+		pickImage.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent();
+				intent.setType("image/*");
+				intent.setAction(Intent.ACTION_GET_CONTENT);
+				intent.putExtra("return-data", true); 
+				startActivityForResult(Intent.createChooser(intent, "Select Picture"),RESULT_LOAD_IMAGE);
+			}
+			
+		});
+		
+		
+		OnTouchListener imgSourceOnTouchListener = new OnTouchListener() {
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+
+				float eventX = event.getX();
+				float eventY = event.getY();
+				float[] eventXY = new float[] { eventX, eventY };
+
+				Matrix invertMatrix = new Matrix();
+				((ImageView) view).getImageMatrix().invert(invertMatrix);
+
+				invertMatrix.mapPoints(eventXY);
+				int x = Integer.valueOf((int) eventXY[0]);
+				int y = Integer.valueOf((int) eventXY[1]);
+
+				Drawable imgDrawable = ((ImageView) view).getDrawable();
+				Bitmap bitmap = ((BitmapDrawable) imgDrawable).getBitmap();
+				if (x < 0)
+					x = 0;
+				else if (x > bitmap.getWidth() - 1) 
+					x = bitmap.getWidth() - 1;
+
+				if (y < 0) 
+					y = 0;
+				else if (y > bitmap.getHeight() - 1) 
+					y = bitmap.getHeight() - 1;
+				
+
+				int touchedRGB = bitmap.getPixel(x, y);
+
+				colorHex.setBackgroundColor(touchedRGB);
+				if (String.valueOf(Integer.toHexString(touchedRGB)).length() > 2)
+				{
+					colorHex.setText("HEX:   #" + String.valueOf(Integer.toHexString(touchedRGB)).substring(2));
+				}
+				layout.setBackgroundColor(touchedRGB);
+				return true;
+			}
+		};
+		
+		image.setOnTouchListener(imgSourceOnTouchListener);
+	}
+	
+	
+	 @Override
+	    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	        super.onActivityResult(requestCode, resultCode, data);
+	        if (resultCode == Activity.RESULT_OK) {
+	        	Uri selectedImage = data.getData();
+	            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+
+	            Cursor cursor = getContentResolver().query(selectedImage,
+	                    filePathColumn, null, null, null);
+	            cursor.moveToFirst();
+
+	            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+	            String picturePath = cursor.getString(columnIndex);
+	            cursor.close();
+	            ImageView imageView = (ImageView) findViewById(R.id.image);
+		        imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+	        }
+	    }
+	
+	
+	
+	
+}

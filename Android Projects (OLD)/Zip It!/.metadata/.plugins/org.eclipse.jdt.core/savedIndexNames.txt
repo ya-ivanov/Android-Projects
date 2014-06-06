@@ -1,0 +1,4 @@
+INDEX VERSION 1.126+C:\Users\yavko\Desktop\Zip It!\.metadata\.plugins\org.eclipse.jdt.core
+3693162485.index
+1048457148.index
+215094615.index

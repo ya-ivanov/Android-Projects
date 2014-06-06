@@ -1,0 +1,42 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#dedede"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Large Text"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/files"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="\nChoose files: (use path and commas)"
+        android:ems="10" >
+    </EditText>
+    
+    <EditText
+        android:id="@+id/endDir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10" >
+    </EditText>
+    
+    <EditText
+        android:id="@+id/archiveName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10" >
+    </EditText>
+    
+    <Spinner
+	    android:id="@+id/spinner"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" />
+
+</LinearLayout>

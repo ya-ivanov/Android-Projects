@@ -1,0 +1,57 @@
+package com.the.color.app;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.view.Menu;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+
+public class MainActivity extends Activity {
+
+	Button getColor;
+	ImageView image;
+	EditText colorHex;
+	
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        getColor = (Button)findViewById(R.id.getColor);
+        image = (ImageView)findViewById(R.id.image);
+        colorHex = (EditText)findViewById(R.id.colorHex);
+        
+        
+        image.setOnTouchListener(new OnTouchListener(){     
+            @Override   
+            public boolean onTouch(View v, MotionEvent event) {
+            	
+            	if (event.getAction() == MotionEvent.ACTION_DOWN) {
+
+                    int eventX = (int) event.getX();
+                    int eventY = (int) event.getY();
+                    ImageView imageView = ((ImageView)v);
+                    Bitmap bitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
+                    int pixel = bitmap.getPixel(eventX, eventY);
+                    int redValue = Color.red(pixel);
+                    int blueValue = Color.blue(pixel);
+                    int greenValue = Color.green(pixel);
+                    colorHex.setBackgroundColor(pixel);
+                    colorHex.setText(String.valueOf(pixel));
+                    return true;   
+                    
+                }
+				return false;
+            }
+        });
+    } 
+}

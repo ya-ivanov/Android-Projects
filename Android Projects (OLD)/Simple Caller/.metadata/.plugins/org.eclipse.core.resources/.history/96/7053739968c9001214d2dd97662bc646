@@ -1,0 +1,232 @@
+package com.simple_caller;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipData.Item;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.telephony.SmsManager;
+import android.text.Editable;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+
+public class MainActivity<Main> extends Activity {
+
+	Button callBtn;
+	EditText number;
+	ListView listView;
+	static String numberToCall = "";
+	static String personName = "";
+	private List<String> mNameNumber = new ArrayList<String>();
+	
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        callBtn = (Button)findViewById(R.id.callBtn);
+        number = (EditText)findViewById(R.id.number);
+        
+        Cursor c = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        String contactName, contactTelNumber = "";
+        String contactID;
+
+        // You only need to find these indices once
+        int idIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
+        int hasNumberIndex = c.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER);
+        int nameIndex = c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+
+
+        // This is simpler than calling getCount() every iteration
+        while(c.moveToNext()) {
+            contactName = c.getString(nameIndex);
+            contactID = c.getString(idIndex);
+
+            // If this is an integer ask for an integer
+            if (c.getInt(hasNumberIndex) > 0) {
+                Cursor pCur = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[] { contactID },null);
+                while (pCur.moveToNext()) {
+                    contactTelNumber = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                    // Store the "name: number" string in our list
+                    if (!mNameNumber.contains(contactName + ": " + contactTelNumber))
+                    	mNameNumber.add(contactName + ": " + contactTelNumber);
+                    
+                } 
+            }
+        }
+
+        // Find the ListView, create the adapter, and bind them
+        listView = (ListView) findViewById(R.id.contacts);
+        Collections.sort(mNameNumber);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mNameNumber);
+        listView.setAdapter(adapter);
+        
+
+        final String items[] = {"Call Number","Write SMS","Copy"};
+
+        final AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
+        ab.setTitle("Choose option:");
+        ab.setItems(items, new DialogInterface.OnClickListener() {
+    	    @SuppressLint({ "NewApi", "NewApi", "NewApi" }) public void onClick(DialogInterface d, int choice) {
+    		    if(choice == 0) 
+    		    {
+    		    	try 
+    				{
+    					Intent callIntent = new Intent(Intent.ACTION_CALL);
+                        callIntent.setData(Uri.parse("tel: "+numberToCall));
+                        startActivity(callIntent);
+    					
+                    } 
+    				catch (ActivityNotFoundException activityException)
+                    {
+                        Toast.makeText(getApplicationContext(), "Calling a Phone Number", Toast.LENGTH_LONG).show();
+                    }
+    		    }
+    		    else if(choice == 1)
+    		    {
+    		    	//SmsManager.getDefault().sendTextMessage(number, null, messageToSend, null,null);
+    		    	Intent myIntent = new Intent(MainActivity.this, SmsActivity.class);
+    		    	myIntent.putExtra("contactNum", numberToCall); //Optional parameters
+    		    	myIntent.putExtra("contactName", personName);
+    		    	MainActivity.this.startActivity(myIntent);
+    		    }
+    		    else if(choice == 2)
+    		    {
+    		    	int sdk = android.os.Build.VERSION.SDK_INT;
+    	            if(sdk < android.os.Build.VERSION_CODES.HONEYCOMB) {
+    	                android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+    	                clipboard.setText(numberToCall);
+    	            } else {
+    	                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE); 
+    	                android.content.ClipData clip = android.content.ClipData.newPlainText("Copy", numberToCall);
+    	                clipboard.setPrimaryClip(clip);
+    	            }
+    		    }
+    	    }
+    	    });
+        
+        
+        listView.setOnItemClickListener(new OnItemClickListener()
+        {
+
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
+				
+				numberToCall = mNameNumber.get(arg2).split(":")[1].trim();
+				personName = mNameNumber.get(arg2).split(":")[0].trim();
+				//Toast.makeText(getApplicationContext(), numberToCall , Toast.LENGTH_SHORT).show();
+				ab.show();
+			}
+        });
+        
+        callBtn.setOnClickListener(new OnClickListener() {
+        	public void onClick(View arg0) {
+        		try 
+				{
+					String numToCall = String.valueOf(number.getText());
+                    Intent callIntent = new Intent(Intent.ACTION_CALL);
+                    callIntent.setData(Uri.parse("tel: "+numToCall));
+                    startActivity(callIntent);
+                } 
+				catch (ActivityNotFoundException activityException)
+                {
+                    Toast.makeText(getApplicationContext(), "Please enter proper number.", Toast.LENGTH_LONG).show();
+                }
+			}
+        });
+        
+    }    
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+        MenuItem find = menu.findItem(R.id.find);
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Find contact:");
+		// Set an EditText view to get user input 
+		final EditText input = new EditText(this);
+		alert.setView(input);
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int whichButton) {
+		  String value = String.valueOf(input.getText());
+			  for(int i = 1; i < mNameNumber.size(); i++)
+	          {
+		          	if (value.toLowerCase().equals(mNameNumber.get(i).toLowerCase()))
+		          	{
+		          		listView.setSelection(i);
+		          		break;
+		          	}
+	          }
+		  }
+		});
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		  public void onClick(DialogInterface dialog, int whichButton) {
+		    // Canceled.
+		  }
+		});
+		alert.show();
+        
+        find.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+			public boolean onMenuItemClick(MenuItem arg0) {
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				final EditText input = null;
+				new AlertDialog.Builder(MainActivity.this)
+			    .setTitle("Enter name:")
+			    .setView(input)
+			    .setPositiveButton("Search", new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int whichButton) {
+			        	String lookFor = String.valueOf(input.getText());
+			            for(int i = 1; i < mNameNumber.size(); i++)
+			            {
+			            	if (lookFor.toLowerCase().equals(mNameNumber.get(i)))
+			            	{
+			            		listView.setSelection(i);
+			            		break;
+			            	}
+			            }
+			        }
+			    }).setNegativeButton("Cancel", null).show();
+				return false;
+			}
+        	
+        });
+        return true;
+    }
+}

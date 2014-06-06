@@ -1,0 +1,32 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="#373737" >
+
+    <ImageView
+        android:id="@+id/pickImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/title"
+        android:layout_gravity="right" />
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.84" />
+
+    <EditText
+        android:id="@+id/colorHex"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:editable="false"
+        android:background="#373737"  >
+
+        <requestFocus />
+    </EditText>
+
+</LinearLayout>

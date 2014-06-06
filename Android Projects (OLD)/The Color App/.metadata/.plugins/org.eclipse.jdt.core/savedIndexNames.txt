@@ -1,0 +1,4 @@
+INDEX VERSION 1.126+C:\Users\yavko\Desktop\The Color App\.metadata\.plugins\org.eclipse.jdt.core
+1415169642.index
+215094615.index
+803974846.index

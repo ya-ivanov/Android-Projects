@@ -1,0 +1,4 @@
+INDEX VERSION 1.126+C:\Users\явор\Desktop\Simple Caller\.metadata\.plugins\org.eclipse.jdt.core
+3696051401.index
+2646991149.index
+3446317528.index
